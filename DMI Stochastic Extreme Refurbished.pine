@@ -34,7 +34,7 @@ var color COLOR_DOWN_MKR    = color.new(color.red, 0)
 
 // ------------------------- Inputs {
 // -->
-var string DMI_HISTO = 'DMI (Area or Histogram)'
+var string DMI_HISTO = 'DMI Histogram'
 
 var lenDIslow = input.int(10, minval=1, title="DI Length", group=DMI_HISTO, inline='10')
 var DIsmoothSlow = input.bool(true, title='Smooth DI?', group=DMI_HISTO, inline='10')
@@ -44,13 +44,13 @@ var string typeDISmoothSlow = input.string(defval=SMA, title='Type of Smooth',
   options=[SMA, EMA, REMA, HMA, ALMA, WMA, LSQ, VWMA, SMMA, MEDIAN, VWAP],
   inline='11', group=DMI_HISTO)
   
-var col_grow_above_slow = input(color.new(#0000FF, 60), "Above Grow", inline="15", group=DMI_HISTO)
-var col_fall_above_slow = input(color.new(#2962ff, 60), "Fall", inline="15", group=DMI_HISTO)
+var col_grow_above_slow = input(color.new(#0000FF, 30), "Above Grow", inline="15", group=DMI_HISTO)
+var col_fall_above_slow = input(color.new(#2962ff, 50), "Fall", inline="15", group=DMI_HISTO)
 var col_grow_below_slow = input(color.new(#c2185b, 60), "Below Grow", inline="16", group=DMI_HISTO)
 var col_fall_below_slow = input(color.new(#670438, 60), "Fall", inline="16", group=DMI_HISTO)
 
 // -->
-var string DMI_STOCH = 'DMI (Stochastic Extreme)'
+var string DMI_STOCH = 'DMI Stochastic Extreme'
 var lenDI = input.int(10, minval=1, title="DI Length", group=DMI_STOCH, inline='40')
 var DIsmooth = input.bool(false, title='Smooth DI?', group=DMI_STOCH, inline='40')
 
@@ -59,10 +59,10 @@ var string typeDISmooth = input.string(defval=SMA, title='Type of Smooth',
   options=[SMA, EMA, REMA, HMA, ALMA, WMA, LSQ, VWMA, SMMA, MEDIAN, VWAP],
   inline='41', group=DMI_STOCH)
 
-var col_grow_above = input(#0039ff, "Above Grow", inline="42", group=DMI_STOCH)
-var col_fall_above = input(#5b9cf6, "Fall", inline="42", group=DMI_STOCH)
-var col_grow_below = input(#ec407a, "Below Grow", inline="43", group=DMI_STOCH)
-var col_fall_below = input(#880e4f, "Fall", inline="43", group=DMI_STOCH)
+var col_grow_above = input.color(#0039ff, "Above Grow", inline="42", group=DMI_STOCH)
+var col_fall_above = input.color(#5b9cf6, "Fall", inline="42", group=DMI_STOCH)
+var col_grow_below = input.color(#ec407a, "Below Grow", inline="43", group=DMI_STOCH)
+var col_fall_below = input.color(#880e4f, "Fall", inline="43", group=DMI_STOCH)
 
 var stochHiLoLen = input.int(3, minval=1, title="Stochastic High-Low Length", group=DMI_STOCH, inline='45')
 var stochSumlen = input.int(3, minval=1, title="Stochastic Sum Length", group=DMI_STOCH, inline='46')
@@ -94,12 +94,21 @@ var bottomAlertLine = input.int(10, title='Bottom Alert Line', inline='70', grou
 var topAlertCross = input.int(90, title='Fill overbought', inline='71', group=LINES)
 var bottomAlertCross = input.int(10, title='Fill oversold', inline='71', group=LINES)
 
-var color colorOverBought = input.color(color.new(COLOR_DOWN, 90), title='Overbought', group=LINES, inline='75')
-var color colorOverSold = input.color(color.new(#0005ee, 80), title='Oversold', group=LINES, inline='75')
+var color colorOverBought = input.color(color.new(COLOR_DOWN, 100), title='Overbought', group=LINES, inline='75')
+var color colorOverSold = input.color(color.new(#0005ee, 100), title='Oversold', group=LINES, inline='75')
 
 var string CROSS = 'Cross Alerts'
-var color colorAlertBull = input.color(color.new(#90bff9, 0), title='Bear', group=CROSS, inline='80')
-var color colorAlertBear = input.color(color.new(#faa1a4, 0), title='Bear', group=CROSS, inline='80')
+var color colorAlertBull = input.color(color.new(#5b9cf6, 0), title='Bear', group=CROSS, inline='80')
+var color colorAlertBear = input.color(color.new(#f77c80, 0), title='Bear', group=CROSS, inline='80')
+
+var string BAR_COLORS = 'Bar colors'
+var showBarColors = input.bool(true, title='Colorize bars according to DMI Oscillator?', group=BAR_COLORS, inline='90')
+var color colorBarBullDMI = input.color(color.new(color.blue, 0), title='DMI above 0', group=BAR_COLORS, inline='91')
+var color colorBarBearDMI = input.color(color.new(#ec407a, 0), title='DMI below 0', group=BAR_COLORS, inline='91')
+var showBarColors2 = input.bool(true, title='Colorize bars on signals of DMI Stoch?', group=BAR_COLORS, inline='92')
+var color colorBarSignalDMI = input.color(color.new(color.yellow, 0), title='Signal', group=BAR_COLORS, inline='93')
+var color colorBarSignalDMItrendBull = input.color(color.new(color.lime, 0), title='Inside bullish trend', group=BAR_COLORS, inline='93')
+var color colorBarSignalDMItrendBear = input.color(color.new(color.lime, 0), title='Inside bearish trend', group=BAR_COLORS, inline='93')
 // ------------------------- }  
   
 // ------------------------- Moving Average {
@@ -205,8 +214,8 @@ lineAlertCenter = hline(50, "Center", color=color.new(color.gray, 0), linestyle=
 lineAlertBottom = hline(bottomAlertLine, "Oversold", color=color.new(color.blue, 0), linestyle=hline.style_solid, display=display.all)
 
 // DI
-plot(diffSlow, title="DI Histogram", style=plot.style_columns, color=diffColorSlow)
-plot(diffSlow, title="DI Lines", style=plot.style_line, color=color.new(diffColorSlow, 0), linewidth=2, display=display.all)
+plot(diffSlow, title="DI Histogram", style=plot.style_histogram, color=diffColorSlow, linewidth=3)
+plot(diffSlow, title="DI Lines", style=plot.style_line, color=color.new(diffColorSlow, 0), linewidth=3, display=display.all)
 
 plot(diff, title="DI for Stoch", style=plot.style_area, color=diffColor, display=display.none)
 plot(diff, title="DI Lines for Stoch", style=plot.style_line, color=diffColor, linewidth=2, display=display.none)
@@ -230,4 +239,30 @@ crossDown = stoch[1] > topAlertCross and stoch < topAlertCross ? true : false
 
 plotchar(crossUp, title="Crossing Up", char='↑', location=location.bottom, color=colorAlertBull, size=size.small, offset=0)
 plotchar(crossDown, title="Crossing Down",char='↓', location=location.top, color=colorAlertBear, size=size.small, offset=0)
+
+colorBar = if showBarColors
+    if diffSlow < 0
+        colorBarBearDMI
+    else
+        colorBarBullDMI
+else
+    na
+    
+colorBar := if showBarColors2
+    if crossUp 
+        if diffSlow >= 0
+            colorBarSignalDMItrendBull
+        else
+            colorBarSignalDMI
+    else if crossDown
+        if diffSlow <= 0
+            colorBarSignalDMItrendBear
+        else
+            colorBarSignalDMI
+    else
+        colorBar
+else
+    colorBar
+    
+barcolor(colorBar, title='Bar color')
 // ------------------------- }
